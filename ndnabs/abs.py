@@ -37,7 +37,6 @@ class ABS:
         '''
         return signature
         '''
-        tpk,apk = pk
         lambd = {}
         
         M = [[1, 1], [0, -1]]
@@ -55,9 +54,9 @@ class ABS:
 
         for i in range(1,len(M)+1):
             end = 0
-            multi = ((apk['C'] * (tpk['g'] ** mu)) ** r[i])
+            multi = ((pk['C'] * (pk['g'] ** mu)) ** r[i])
             try: #this fills in for the v vector
-                end = multi * (ska['K{}'.format(tpk['atr'][u[i-1]])] ** r[0])
+                end = multi * (ska['K{}'.format(pk['atr'][u[i-1]])] ** r[0])
             except KeyError:
                 end = multi
             lambd['S{}'.format(i)] = end
@@ -65,7 +64,7 @@ class ABS:
         for j in range(1,len(M[0])+1):
             end = 0
             for i in range(1,len(M)+1):
-                base = apk['A{}'.format(j)] * (apk['B{}'.format(j)] ** tpk['atr'][u[i-1]])
+                base = pk['A{}'.format(j)] * (pk['B{}'.format(j)] ** pk['atr'][u[i-1]])
                 exp = M[i-1][j-1] * r[i]
                 end = end * (base ** exp)
             lambd['P{}'.format(j)] = end
