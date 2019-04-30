@@ -39,7 +39,7 @@ setup(
 
     keywords='NDN',
 
-    packages=find_packages('ndnabs'),
+    packages=find_packages(exclude=['tests', 'tests.*']),
     python_requires='>3.3',
 
     install_requires=['charm-crypto', 'pyndn', 'pickledb'],
@@ -48,9 +48,9 @@ setup(
         'test': ['coverage'],
     },
 
-    entry_points={  # Optional
-        # 'ndnabs_scripts': [
-        #     'TBD=tbd:tbd',
-        # ],
+    entry_points={
+        'console_scripts': [
+            'ndnabs=ndnabs.command_line:main',
+        ],
     },
 )
