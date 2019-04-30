@@ -40,7 +40,9 @@ class ABS:
         tpk,apk = pk
         lambd = {}
         
-        M,u = self.getMSP(policy, tpk['atr'])
+        M = [[1, 1], [0, -1]]
+        with open("selectattr.txt", 'r') as filehandle:  
+            u = filehandle.readlines()
 
         mu = self.group.hash(message+policy)
 
@@ -74,13 +76,14 @@ class ABS:
         '''
         return bool
         '''
-        tpk,apk = pk
 
-        M,u = self.getMSP(policy,tpk['atr'])
+        M = [[1, 1], [0, -1]]
+        with open("selectattr.txt", 'r') as filehandle:  
+            u = filehandle.readlines()
 
         mu = self.group.hash(message+policy)
 
-        if sign['Y']==0 or pair(sign['Y'],tpk['h0']) != pair(sign['W'],apk['A0']):
+        if sign['Y']==0 or pair(sign['Y'],pk['h0']) != pair(sign['W'],pk['A0']):
             return False
         else:
             sentence = True
@@ -88,11 +91,11 @@ class ABS:
                 multi = 0
                 for i in range(1,len(M)+1):
                     a = sign['S{}'.format(i)]
-                    b = (apk['A{}'.format(j)] * (apk['B{}'.format(j)] ** tpk['atr'][u[i-1]])) ** M[i-1][j-1]
+                    b = (pk['A{}'.format(j)] * (pk['B{}'.format(j)] ** pk['atr'][u[i-1]])) ** M[i-1][j-1]
                     multi = multi * pair(a,b)
                 try:
-                    after = pair(apk['C'] * tpk['g'] ** mu, sign['P{}'.format(j)])
-                    pre = pair(sign['Y'],tpk['h{}'.format(j)])
+                    after = pair(pk['C'] * pk['g'] ** mu, sign['P{}'.format(j)])
+                    pre = pair(sign['Y'], pk['h{}'.format(j)])
                     if j == 1:
                         if multi != (pre * after):#after:
                             sentence = False
@@ -103,29 +106,18 @@ class ABS:
                     print(err)
             return sentence
     
-    def getMSP(self,policy,attributes):
+    def getMSP(self,matrix,attributes):
 
         '''
         returns the MSP that fits given policy
 
-        utilizes the charm-crypto "policy -> binary tree" structure which has to be
-        gone through only once
-
         target vector (1,0,....,0)
-        '''
-        u = {}
-        counter = 0
-        for i in attributes:
-            u[counter] = i
-            u[i] = counter
-            counter += 1
-        '''
+
         Current implementation has a policy with 2 attr seperated by AND
         Thus, we hard-code the MSP in here
         '''
-        matrix = [[1, 1], [0, -1]]
-
-        print(matrix)
+        u = {}
+        u = attributes
         return matrix,u
 
     
