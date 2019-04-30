@@ -36,3 +36,6 @@ doc/_build
 bin/*
 libs/*
 .libs/*
+
+# Generated files
+/*.db

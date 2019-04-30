@@ -42,7 +42,7 @@ setup(
     packages=find_packages('ndnabs'),
     python_requires='>3.3',
 
-    install_requires=['charm-crypto', 'pyndn'],
+    install_requires=['charm-crypto', 'pyndn', 'pickledb'],
 
     extras_require={  # Optional
         'test': ['coverage'],
