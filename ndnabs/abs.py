@@ -16,62 +16,6 @@ class ABS:
     def __init__(self,group):
         self.group = group
 
-    def trusteesetup(self, attributes):
-        '''
-        Run by signature trustees
-        returns the trustee public key
-
-        Notice: Certain variables have been removed completely.
-        G and H are handled by G1 and G2 type generators respectively,
-        and the hash function is a generic one for the curve and can
-        be derived from the group attribute.
-
-        Attributes have to be appended to the end for global-ness
-        '''
-        tpk = {}
-        tmax = 2*len(attributes)
-
-        tpk['g'] = self.group.random(G1)
-        for i in range(tmax+1): #provide the rest of the generators
-            tpk['h{}'.format(i)] = self.group.random(G2)
-
-        attriblist = {}
-        counter = 2
-        for i in attributes:
-            attriblist[i] = counter
-            counter += 1
-
-        tpk['atr'] = attriblist
-
-        return tpk
-
-    def authoritysetup(self, tpk):
-        '''
-        Run by attribute-giving authority, takes tpk as parametre
-        returns attribute master key and public key
-        '''
-        ask = {}
-        apk = {}
-        tmax = 2 * len(tpk['atr'])
-
-        group = self.group
-        a0,a,b = group.random(ZR), group.random(ZR), group.random(ZR)
-        ask['a0'] = a0
-        ask['a'] = a
-        ask['b'] = b
-        ask['atr'] = tpk['atr'] #this is for ease of usage
-
-        apk['A0'] = tpk['h0'] ** a0
-        for i in range(1,tmax+1): #rest of the whateverifys
-            apk['A{}'.format(i)] = tpk['h{}'.format(i)] ** a
-
-        for i in range(1,tmax+1):
-            apk['B{}'.format(i)] = tpk['h{}'.format(i)] ** b
-
-        apk['C'] = tpk['g'] ** group.random(ZR) #C = g^c at the end
-
-        return ask,apk
-
     def generateattributes(self, ask, attriblist):
         '''
         returns signing key SKa
@@ -95,7 +39,7 @@ class ABS:
         '''
         tpk,apk = pk
         lambd = {}
-
+        
         M,u = self.getMSP(policy, tpk['atr'])
 
         mu = self.group.hash(message+policy)
@@ -158,8 +102,9 @@ class ABS:
                 except Exception as err:
                     print(err)
             return sentence
-
+    
     def getMSP(self,policy,attributes):
+
         '''
         returns the MSP that fits given policy
 
@@ -174,39 +119,72 @@ class ABS:
             u[counter] = i
             u[i] = counter
             counter += 1
+        '''
+        Current implementation has a policy with 2 attr seperated by AND
+        Thus, we hard-code the MSP in here
+        '''
+        matrix = [[1, 1], [0, -1]]
 
-        parser = PolicyParser()
-        tree = parser.parse(policy)
-
-        matrix = [] #create matrix as a dummy first (easy indexing)
-        for i in range(len(attributes)):
-            matrix.append([])
-
-        counter = [1]
-        def recursivefill(node,vector): #create MSP compatible rows
-            if node.getNodeType() == OpType.ATTR:
-                text = node.getAttribute()
-                temp = list(vector)
-                matrix[u[text]] = temp
-            elif node.getNodeType() == OpType.OR:
-                recursivefill(node.getLeft(),vector)
-                recursivefill(node.getRight(),vector)
-            else: #AND here, right?
-                temp = list(vector)
-                while(len(temp)<counter[0]):
-                    temp.append(0)
-                emptemp = []
-                while(len(emptemp)<counter[0]):
-                    emptemp.append(0)
-                temp.append(1)
-                emptemp.append(-1)
-                counter[0] += 1
-                recursivefill(node.getLeft(),temp)
-                recursivefill(node.getRight(),emptemp)
-        recursivefill(tree,[1])
-
-        for i in matrix:
-            while(len(i)<counter[0]):
-                i.append(0)
-
+        print(matrix)
         return matrix,u
+
+    
+
+    '''
+
+    def trusteesetup(self, attributes):
+
+        Run by signature trustees
+        returns the trustee public key
+
+        Notice: Certain variables have been removed completely.
+        G and H are handled by G1 and G2 type generators respectively,
+        and the hash function is a generic one for the curve and can
+        be derived from the group attribute.
+
+        Attributes have to be appended to the end for global-ness
+
+        tpk = {}
+        tmax = 2 * len(attributes)
+
+        tpk['g'] = self.group.random(G1)
+        for i in range(tmax+1): #provide the rest of the generators
+            tpk['h{}'.format(i)] = self.group.random(G2)
+
+        attriblist = {}
+        counter = 2
+        for i in attributes:
+            attriblist[i] = counter
+            counter += 1
+
+        tpk['atr'] = attriblist
+
+        return tpk
+
+    def authoritysetup(self, tpk):
+
+        Run by attribute-giving authority, takes tpk as parametre
+        returns attribute master key and public key
+
+        ask = {}
+        apk = {}
+        tmax = 2 * len(tpk['atr'])
+
+        group = self.group
+        a0,a,b = group.random(ZR), group.random(ZR), group.random(ZR)
+        ask['a0'] = a0
+        ask['a'] = a
+        ask['b'] = b
+        ask['atr'] = tpk['atr'] #this is for ease of usage
+
+        apk['A0'] = tpk['h0'] ** a0
+        for i in range(1,tmax+1): #rest of the whateverifys
+            apk['A{}'.format(i)] = tpk['h{}'.format(i)] ** a
+
+        for i in range(1,tmax+1):
+            apk['B{}'.format(i)] = tpk['h{}'.format(i)] ** b
+
+        apk['C'] = tpk['g'] ** group.random(ZR) #C = g^c at the end
+
+        return ask,apk
+    '''

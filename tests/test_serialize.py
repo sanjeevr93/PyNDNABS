@@ -8,13 +8,13 @@ class TestSerialize(unittest.TestCase):
         self.group = PairingGroup('MNT159')
         self.abs = ndnabs.ABS(self.group)
 
-        self.attributes = ['TEST1', 'TEST2']
+        self.attributes = ['TEST1', 'TEST2', 'TEST3']
         self.tpk = self.abs.trusteesetup(self.attributes)
         self.ask, self.apk = self.abs.authoritysetup(self.tpk)
 
-        self.ska = self.abs.generateattributes(self.ask,['TEST1'])
+        self.ska = self.abs.generateattributes(self.ask,['TEST1','TEST2'])
         self.testMessage = 'test message'
-        self.testPolicy = 'TEST1'
+        self.testPolicy = 'TEST1 AND TEST2'
         self.signature = self.abs.sign((self.tpk, self.apk), self.ska, self.testMessage, self.testPolicy)
 
         # sanity check
