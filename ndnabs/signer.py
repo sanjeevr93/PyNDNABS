@@ -10,6 +10,10 @@ import pyndn
 import base64
 
 class Signer():
+    pk = None
+    ska = None
+    abs = None
+    publicParams = None
 
     def __init__(self, db):
         self.db = db
@@ -59,8 +63,9 @@ class Signer():
         if selfSign:
             locator.append(data.getName())
         else:
-            pass
-            # todo: set attribute authority name
+            if not isinstance(self.publicParams, pyndn.Data):
+                raise RuntimeError("Public parameters must be installed before signing")
+            locator.append(self.publicParams.getName())
 
         locator.append(b'&'.join(attributes))
         keyLocator = pyndn.KeyLocator()

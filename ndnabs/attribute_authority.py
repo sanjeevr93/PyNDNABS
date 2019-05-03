@@ -23,7 +23,6 @@ class AttributeAuthority:
     def setup(self, name):
         self.apk, self.ask = self.abs.authSetup()
         self.self_attributes = [b'self', name.toUri().encode('utf-8')]
-
         
         self.db.save('apk', utils.serialize(self.apk, self.abs.group))
         self.db.save('ask', utils.serialize(self.ask, self.abs.group))
