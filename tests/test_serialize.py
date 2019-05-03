@@ -6,12 +6,12 @@ class TestSerialize(unittest.TestCase):
     def setUp(self):
         self.abs = ndnabs.ABS()
 
-        self.attributes = ['TEST1', 'TEST2', 'TEST3']
+        self.attributes = [b'TEST1', b'TEST2', b'TEST3']
         self.apk, self.ask = self.abs.authSetup()
 
-        self.ska = self.abs.generateattributes(self.ask, ['TEST1','TEST2'])
+        self.ska = self.abs.generateattributes(self.ask, [b'TEST1', b'TEST2'])
         self.testMessage = b'test message'
-        self.testAttributes = ['TEST1', 'TEST2']
+        self.testAttributes = [b'TEST1', b'TEST2']
         self.signature = self.abs.sign(self.apk, self.ska, self.testMessage, self.testAttributes)
 
         # sanity check

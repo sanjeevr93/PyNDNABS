@@ -78,7 +78,7 @@ class ABS:
 
         M = [[1, 1], [0, -1]]
         u = [self.group.hash(i) for i in attributes]
-        mu = self.group.hash(message + b' AND '.join([i.encode('utf-8') for i in attributes]))
+        mu = self.group.hash(message + b' AND '.join(attributes))
         return M, u, mu
 
     def sign(self, pk, ska, message, attributes):

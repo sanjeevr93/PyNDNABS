@@ -26,16 +26,16 @@ class TestSigner(unittest.TestCase):
         os.remove(self.tmpDbPath)
         
     def test_sign(self):
-        signature = self.signer.sign(self.testMessage, ['Monday', 'Tuesday'])
+        signature = self.signer._sign(self.testMessage, [b'Monday', b'Tuesday'])
 
         with self.assertRaises(ndnabs.AttributeKeyNotAvailable):
-            self.signer.sign(self.testMessage, ['MONDAY', 'Tuesday'])
+            self.signer._sign(self.testMessage, [b'MONDAY', b'Tuesday'])
 
         oldSecret = self.signer.get_secret()
-        newSecret = self.aa.gen_attr_keys(['MONDAY'], oldSecret)
+        newSecret = self.aa.gen_attr_keys([b'MONDAY'], oldSecret)
 
         self.signer.install_secret(newSecret)
-        self.signer.sign(self.testMessage, ['MONDAY', 'Tuesday'])
+        self.signer._sign(self.testMessage, [b'MONDAY', b'Tuesday'])
 
 if __name__ == '__main__':
     unittest.main()

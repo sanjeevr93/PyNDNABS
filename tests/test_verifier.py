@@ -29,11 +29,11 @@ class TestVerifier(unittest.TestCase):
         os.remove(self.tmpDbPath)
         
     def test_verify(self):
-        signature = self.signer.sign(self.testMessage, ['Monday', 'Tuesday'])
+        signature = self.signer._sign(self.testMessage, [b'Monday', b'Tuesday'])
 
-        self.assertTrue(self.verifier.verify(signature, self.testMessage, ['Monday', 'Tuesday']))
-        self.assertFalse(self.verifier.verify(signature, b'not a message', ['Monday', 'Tuesday']))
-        self.assertFalse(self.verifier.verify(signature, self.testMessage, ['Monday', 'Wednesday']))
+        self.assertTrue(self.verifier.verify(signature, self.testMessage, [b'Monday', b'Tuesday']))
+        self.assertFalse(self.verifier.verify(signature, b'not a message', [b'Monday', b'Tuesday']))
+        self.assertFalse(self.verifier.verify(signature, self.testMessage, [b'Monday', b'Wednesday']))
 
 if __name__ == '__main__':
     unittest.main()

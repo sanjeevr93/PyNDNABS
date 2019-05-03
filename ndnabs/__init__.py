@@ -11,3 +11,5 @@ from .attribute_authority import AttributeAuthority
 from .signer import Signer
 from .verifier import Verifier
 
+from .sha256_with_abs_signature import Sha256WithAbsSignature
+
