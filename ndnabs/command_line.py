@@ -1,78 +1,117 @@
 # -*- Mode: python; py-indent-offset: 4; indent-tabs-mode: nil; coding: utf-8; -*-
 
 from . import ABS, AttributeAuthority, Signer, Verifier, PickleDb
+from . import db
 
 import argparse
 import os
 import sys
+import pyndn
+import tempfile
     
-def main():
-    parser = argparse.ArgumentParser(description = "The command line tools for the Attribute authority to perform dedicated operations")
-    parser.add_argument('-p', '--path', default=os.path.expanduser(os.path.abspath('~/.ndn')), help='''Set path for security database (default: ~/.ndn)''')
-    # parser.add_argument("-c", '--command', help='''NDN-ABS command''', 
-    #     choices=["setup", 
-    #                 "get-public-parameters", 
-    #                 "install-public-parameters", 
-    #                 "generate-secret", 
-    #                 "install-secret", 
-    #                 "export-secret"], nargs='*')
-    parser.add_argument("-s", '--setup', help='''Authority Setup''', nargs=1)
-    parser.add_argument("-g", '--getPubParams', help='''Get Public Parameters''', nargs='?')
-    parser.add_argument("-i", '--installPubParams', help='''Install Public Parameters''', nargs='?' )
-    parser.add_argument("-gs", '--genSecret', help='''Generate Secret''', nargs='+')
-    parser.add_argument("-is", '--installSecret', help='''Install Secret''', nargs='?')
-    parser.add_argument("-es", '--exportSecret', help='''Export Secret''', nargs='?')
+class Commandline():
 
-    args = parser.parse_args()
+    def __init__(self):
+        self.DB = db
 
-    db = PickleDb(args.path)
-    # print(db)
-    # print(args.path)
+        parser = argparse.ArgumentParser(description = "The command line tools for the Attribute authority to perform dedicated operations")
+        parser.add_argument("command", help='''NDN-ABS command''', choices=["path", "setup", "getPubParams", "installPubParams", "genSecret", 
+                                "installSecret"])
+        args = parser.parse_args(sys.argv[1:2])
 
-    if args.setup:
+        if not hasattr(self, args.command):
+            print('Unrecognized command')
+            exit(1)
+        getattr(self, args.command)()
+
+    # def path(self):
+    #     parser = argparse.ArgumentParser(description = "DB path")
+    #     parser.add_argument('-p', '--Path', default=os.path.expanduser(os.path.abspath('~/.ndn')), help='''Set path for security database (default: ~/.ndn)''', action='store')
+    #     args = parser.parse_args(sys.argv[2:])
+    #     db = PickleDb(args.Path)
+    #     self.aa = AttributeAuthority(db)
+    #     print(db)
+
+    def setup(self):
+        parser = argparse.ArgumentParser(description = "Attribute authority setup")
+        parser.add_argument('-s', '--Setup', action='store')
+        args = parser.parse_args(sys.argv[2:])
         try:
-            # print("Setup successful")
-            # print(args.setup)
-            self.AttributeAuthority.setup(args.setup)
+            print('Success')
+            print(args.Setup)
+            self.aa = AttributeAuthority(DB)
+            print(DB)
+            self.aa.setup(pyndn.Name(args.Setup))
+            print('Success')
         except:
             pass
 
-    elif args.getPubParams:
+    def getPubParams(self): 
+        parser = argparse.ArgumentParser(description = "Retrieve Public Parameters from repo")
+        parser.add_argument('-g', '--GetPub', action='store')
         try:
-            # print("Entered GetPubParams")
-            # print(args.getPubParams)
-            # print(args.path)
-            aa = AttributeAuthority.get_apk
-            # print(aa)
+            self.aa = AttributeAuthority(DB)
+            print(DB)
+            self.aa.get_public_params()
         except:
             raise AssertionError
 
-    elif args.installPubParams:
-        try:
-            self.Signer._install_pk
-            self.Verifier.install_public_parameters
-        except:
-            raise ValueError
 
-    elif args.genSecret:
+    def installPubParams(self):
+        parser = argparse.ArgumentParser(description = "Install the Public Parameters retrieved from repo")
+        parser.add_argument('-i', '--InstallPub', action='store')
         try:
-            # print(parser.parse_args(sys.argv[2:]))
-            self.AttributeAuthority.gen_attr_keys(parser.parse_args(sys.argv[2:])) # Not sure if this passes a list of attributes or not
+            self.aa = AttributeAuthority(DB)
+            self.signer = Signer(DB)
+            self.signer.install_public_params(self.aa.get_public_params())
+            print('Success')
+
+            # self.verifier = Verifier(DB)
+            # self.verifier.install_public_params(self.aa.get_public_params())
+        except:
+            pass
+
+
+    def genSecret(self):
+        parser = argparse.ArgumentParser(description = "Generate Secret Signing key")
+        parser.add_argument('-gs', '--GenSec', nargs=2, action='store')
+        args = parser.parse_args(sys.argv[2:])
+        try:
+            self.aa = AttributeAuthority(DB)
+            abc = self.aa.gen_attr_keys(args.GenSec) # Not sure if this passes a list of attributes or not
+            print(abc)
         except: 
-            if len(parser.parse_args(sys.argv[3:])) > 2:
+            if len(args.GenSec) > 2:
                 raise ValueError("Attribute list must have max 2 attributes")
+
     
-    elif args.installSecret:
+    def installSecret(self):
+        parser = argparse.ArgumentParser(description = "Install the Secret Signing key")
+        parser.add_argument('-is', '--InstallSec', action='store')
         try:
-            self.Signer.install_secret(db, True)
+            self.signer = Signer(DB)
+            self.signer.install_secret(Commandline.genSecret.abc)
+            if Commandline.genSecret.abc:
+                print('Success')
+            else:
+                self.assertRaises(ndnabs.AttributeKeyNotAvailable)
         except:
             pass
 
-    elif args.exportSecret:
-        try:
-            self.Signer.get_secret
-        except:
-            pass
 
-if __name__ == "__main__":
-    main()
+    # def exportSecret(self):
+    #     parser = argparse.ArgumentParser(description = "Install the Secret Signing key")
+    #     parser.add_argument('-is', '--InstallSec', action='store_true')
+    #     try:
+    #         self.signer = Signer(Commandline.path.db)
+    #         tmp = self.Signer.get_secret()
+    #         if tmp:
+    #             print('Success')
+    #         else:
+    #             raise ValueError
+    #     except:
+    #         pass
+
+
+if __name__ == '__main__':
+    Commandline()

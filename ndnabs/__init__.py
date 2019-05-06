@@ -5,7 +5,9 @@ g_ndnAbsPairingGroup = PairingGroup('MNT159')
 
 from .utils import serialize, deserialize
 from .abs import ABS, AttributeKeyNotAvailable
+import os
 from .db import PickleDb
+db = PickleDb(os.path.expanduser(os.path.abspath('~/.ndn')))
 
 from .attribute_authority import AttributeAuthority
 from .signer import Signer
