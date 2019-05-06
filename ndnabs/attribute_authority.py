@@ -46,7 +46,7 @@ class AttributeAuthority:
         self.ask = utils.deserialize(self.db.load('ask'), self.abs.group)
 
     def get_apk(self):
-        return self.db.load('apk')
+        return self.db.load('apk')  
 
     def get_public_params(self):
         return self.db.load('publicParams')

@@ -5,57 +5,74 @@ from . import ABS, AttributeAuthority, Signer, Verifier, PickleDb
 import argparse
 import os
 import sys
-
- 
-     
+    
 def main():
     parser = argparse.ArgumentParser(description = "The command line tools for the Attribute authority to perform dedicated operations")
-    parser.add_argument('command', help='''NDN-ABS command''', 
-        choices=['setup', 
-                    'get-public-parameters', 
-                    'install-public-parameters', 
-                    'generate-secret', 
-                    'install-secret', 
-                    'export-secret'])
-    parser.add_argument('-p', '--path', default=os.path.expanduser('~/.ndn'), help='''Set path for security database (default: ~/.ndn)''')
-    
-    args = parser.parse_args(sys.argv[1:2])
+    parser.add_argument('-p', '--path', default=os.path.expanduser(os.path.abspath('~/.ndn')), help='''Set path for security database (default: ~/.ndn)''')
+    # parser.add_argument("-c", '--command', help='''NDN-ABS command''', 
+    #     choices=["setup", 
+    #                 "get-public-parameters", 
+    #                 "install-public-parameters", 
+    #                 "generate-secret", 
+    #                 "install-secret", 
+    #                 "export-secret"], nargs='*')
+    parser.add_argument("-s", '--setup', help='''Authority Setup''', nargs=1)
+    parser.add_argument("-g", '--getPubParams', help='''Get Public Parameters''', nargs='?')
+    parser.add_argument("-i", '--installPubParams', help='''Install Public Parameters''', nargs='?' )
+    parser.add_argument("-gs", '--genSecret', help='''Generate Secret''', nargs='+')
+    parser.add_argument("-is", '--installSecret', help='''Install Secret''', nargs='?')
+    parser.add_argument("-es", '--exportSecret', help='''Export Secret''', nargs='?')
+
+    args = parser.parse_args()
 
     db = PickleDb(args.path)
+    # print(db)
+    # print(args.path)
 
-    if args.command == 'setup':
+    if args.setup:
         try:
-            self.AttributeAuthority.setup(parser.parse_args(sys.argv[2:]))
+            # print("Setup successful")
+            # print(args.setup)
+            self.AttributeAuthority.setup(args.setup)
         except:
             pass
 
-    elif args.command == 'get-public-parameters':
+    elif args.getPubParams:
         try:
-            self.AttributeAuthority.get_apk
+            # print("Entered GetPubParams")
+            # print(args.getPubParams)
+            # print(args.path)
+            aa = AttributeAuthority.get_apk
+            # print(aa)
         except:
-            pass
-    elif args.command == 'install-public-parameters':
+            raise AssertionError
+
+    elif args.installPubParams:
         try:
-            self.Signer(db, True)
-            self.Verifier(db, True)
+            self.Signer._install_pk
+            self.Verifier.install_public_parameters
         except:
-            pass
-    elif args.command == 'generate-secret':
+            raise ValueError
+
+    elif args.genSecret:
         try:
-            self.AttributeAuthority.gen_attr_keys(parser.parse_args(sys.argv[2:])) # Have to figure a way to pass attr.
+            # print(parser.parse_args(sys.argv[2:]))
+            self.AttributeAuthority.gen_attr_keys(parser.parse_args(sys.argv[2:])) # Not sure if this passes a list of attributes or not
         except: 
             if len(parser.parse_args(sys.argv[3:])) > 2:
                 raise ValueError("Attribute list must have max 2 attributes")
-    elif args.command == 'install-secret':
+    
+    elif args.installSecret:
         try:
             self.Signer.install_secret(db, True)
         except:
             pass
-    elif args.command == 'export-secret':
+
+    elif args.exportSecret:
         try:
             self.Signer.get_secret
         except:
             pass
 
-    # if __name__ == "__main__":
-    #     main(argparse)
+if __name__ == "__main__":
+    main()
