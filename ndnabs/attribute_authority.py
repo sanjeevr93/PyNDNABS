@@ -20,10 +20,17 @@ class AttributeAuthority:
         except:
             pass
 
+    def isSetup(self):
+        try:
+            self.get_apk()
+            return True
+        except:
+            return False
+
     def setup(self, name):
         self.apk, self.ask = self.abs.authSetup()
         self.self_attributes = [b'self', name.toUri().encode('utf-8')]
-        
+
         self.db.save('apk', utils.serialize(self.apk, self.abs.group))
         self.db.save('ask', utils.serialize(self.ask, self.abs.group))
 
@@ -46,11 +53,11 @@ class AttributeAuthority:
         self.ask = utils.deserialize(self.db.load('ask'), self.abs.group)
 
     def get_apk(self):
-        return self.db.load('apk')  
+        return self.db.load('apk')
 
     def get_public_params(self):
         return self.db.load('publicParams')
-        
+
     def gen_attr_keys(self, attributes, serializedExistingSka = None):
         Kbase = None
         existingSka = None
@@ -61,6 +68,7 @@ class AttributeAuthority:
         ska = self.abs.generateattributes(self.ask, attributes, Kbase)
 
         if existingSka:
-            ska = {**existingSka, **ska}
-        
+            newSka = {**existingSka, **ska}
+            newSka['attributes'] = list(**set(existingSka['attributes']), **set(ska['attributes']))
+
         return utils.serialize(ska, self.abs.group)

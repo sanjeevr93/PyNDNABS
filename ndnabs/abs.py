@@ -24,10 +24,10 @@ class ABS:
     def authSetup(self):
         '''
         Run by Attribute Issuing Authority
-        
+
         Store the Public Key (Apk) and Secret key (Ask) into disk
 
-        We define a single authority who defines the public parameters 
+        We define a single authority who defines the public parameters
         that will be used in the system.
         '''
         apk = {}
@@ -53,7 +53,7 @@ class ABS:
         apk['C'] = apk['g'] ** self.group.random(ZR) #C = g^c at the end
 
         return apk, ask
-        
+
     def generateattributes(self, ask, attributes, Kbase = None):
         '''
         returns signing key SKa
@@ -66,6 +66,7 @@ class ABS:
         ska['Kbase'] = Kbase
         ska['K0'] = Kbase ** (1 / ask['a0'])
 
+        ska['attributes'] = attributes
         for i in attributes:
             u = self.group.hash(i)
             ska['K{}'.format(u)] = Kbase ** (1 / (ask['a'] + u * ask['b']))
@@ -92,7 +93,7 @@ class ABS:
         # Under current assumption (2 attributes combined with 'AND'), all 'ska' must include keys for all requested attributes
         for i in range(len(attributes)):
             if 'K{}'.format(u[i]) not in ska.keys():
-                raise AttributeKeyNotAvailable(attributes[i]) 
+                raise AttributeKeyNotAvailable(attributes[i])
 
         r = []
         for i in range(len(M) + 1):
@@ -138,7 +139,7 @@ class ABS:
                     b = (pk['A{}'.format(j)] * (pk['B{}'.format(j)] ** u[i-1])) ** M[i-1][j-1]
                     multi = multi * pair(a,b)
 
-                
+
                 after = pair(pk['C'] * pk['g'] ** mu, sign['P{}'.format(j)])
                 pre = pair(sign['Y'], pk['h{}'.format(j)])
                 if j == 1:

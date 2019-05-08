@@ -21,10 +21,12 @@ class Signer():
         try:
             self.pk = utils.deserialize(self.db.load('pk'), self.abs.group)
         except:
+            # print("PK not available")
             pass
         try:
             self.ska = utils.deserialize(self.db.load('ska'), self.abs.group)
         except:
+            # print("SKA not available")
             pass
 
     def _install_pk(self, encodedPk):
@@ -41,12 +43,20 @@ class Signer():
         encodedPk = self.publicParams.getContent().toBytes()
         self._install_pk(encodedPk)
 
+    def get_public_params_info(self):
+        return self.publicParams
+
     def install_secret(self, encodedSka):
         self.db.save('ska', encodedSka)
         self.ska = utils.deserialize(self.db.load('ska'), self.abs.group)
 
-    def get_secret(self): # this is returning secret keys!!!
+    def get_secret(self):
+        '''Get the installed secret key'''
         return self.db.load('ska')
+
+    def get_attributes(self):
+        '''Get attributes associated with the installed secret key'''
+        return self.ska['attributes']
 
     def _sign(self, message, attributes):
         if not isinstance(message, bytes):

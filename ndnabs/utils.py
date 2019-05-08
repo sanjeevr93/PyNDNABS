@@ -8,15 +8,21 @@ def reDecodeBase64Dict(Object):
     '''base64 decode (not quite sure why the library automatically base64'ing)'''
     out = {}
     for i in Object.keys():
-        x = Object[i].split(b':')
-        out[i]=[x[0], base64.b64decode(x[1])]
+        if i == 'attributes':
+            out[i] = Object[i]
+        else:
+            x = Object[i].split(b':')
+            out[i]=[x[0], base64.b64decode(x[1])]
     return out
 
 def reEncodeBase64Dict(Object):
     '''base64 encode (not quite sure why the library automatically expects base64'ing)'''
     out = {}
     for i in Object.keys():
-        out[i]=b'%s:%s' % (Object[i][0], base64.b64encode(Object[i][1]))
+        if i == 'attributes':
+            out[i] = Object[i]
+        else:
+            out[i]=b'%s:%s' % (Object[i][0], base64.b64encode(Object[i][1]))
     return out
 
 def serialize(Object, group):
