@@ -1,6 +1,6 @@
 # -*- Mode: python; py-indent-offset: 4; indent-tabs-mode: nil; coding: utf-8; -*-
 
-from . import ABS, AttributeAuthority, Signer, Verifier, PickleDb
+from . import ABS, AttributeAuthority, Signer, Verifier, PickleDb, serialize, deserialize
 from . import db
 
 import argparse
@@ -15,7 +15,7 @@ class Commandline():
         self.DB = db
 
         parser = argparse.ArgumentParser(description = "The command line tools for the Attribute authority to perform dedicated operations")
-        parser.add_argument("command", help='''NDN-ABS command''', choices=["path", "setup", "getPubParams", "installPubParams", "genSecret", 
+        parser.add_argument("command", help='''NDN-ABS command''', choices=["setup", "getPubParams", "installPubParams", "genSecret", 
                                 "installSecret"])
         args = parser.parse_args(sys.argv[1:2])
 
@@ -37,37 +37,34 @@ class Commandline():
         parser.add_argument('-s', '--Setup', action='store')
         args = parser.parse_args(sys.argv[2:])
         try:
-            print('Success')
-            print(args.Setup)
-            self.aa = AttributeAuthority(DB)
-            print(DB)
+            self.aa = AttributeAuthority(self.DB)
             self.aa.setup(pyndn.Name(args.Setup))
-            print('Success')
+            print('Setup Successfully completed and public parameters loaded into database')
         except:
-            pass
+            print('Missing a valid Attr. authority name or setup failed')
 
     def getPubParams(self): 
         parser = argparse.ArgumentParser(description = "Retrieve Public Parameters from repo")
         parser.add_argument('-g', '--GetPub', action='store')
         try:
-            self.aa = AttributeAuthority(DB)
-            print(DB)
-            self.aa.get_public_params()
+            self.aa = AttributeAuthority(self.DB)
+            params =  deserialize(self.aa.get_public_params(), self.aa.group)
+            print(params)
         except:
-            raise AssertionError
-
+            print('Unable to retrieve public parameters')
 
     def installPubParams(self):
         parser = argparse.ArgumentParser(description = "Install the Public Parameters retrieved from repo")
         parser.add_argument('-i', '--InstallPub', action='store')
         try:
-            self.aa = AttributeAuthority(DB)
+            self.aa = AttributeAuthority(self.DB)
             self.signer = Signer(DB)
             self.signer.install_public_params(self.aa.get_public_params())
-            print('Success')
+            print('Public parameters successfully installed by Signer')
 
-            # self.verifier = Verifier(DB)
-            # self.verifier.install_public_params(self.aa.get_public_params())
+            self.verifier = Verifier(DB)
+            self.verifier.install_public_params(self.aa.get_public_params())
+            print('Public parameters successfully installed by Verifier')
         except:
             pass
 
@@ -77,9 +74,9 @@ class Commandline():
         parser.add_argument('-gs', '--GenSec', nargs=2, action='store')
         args = parser.parse_args(sys.argv[2:])
         try:
-            self.aa = AttributeAuthority(DB)
-            abc = self.aa.gen_attr_keys(args.GenSec) # Not sure if this passes a list of attributes or not
-            print(abc)
+            self.aa = AttributeAuthority(self.DB)
+            self.aa.gen_attr_keys(args.GenSec) # Not sure if this passes a list of attributes or not
+            print('Secret signing key generated successfully')
         except: 
             if len(args.GenSec) > 2:
                 raise ValueError("Attribute list must have max 2 attributes")
@@ -90,7 +87,7 @@ class Commandline():
         parser.add_argument('-is', '--InstallSec', action='store')
         try:
             self.signer = Signer(DB)
-            self.signer.install_secret(Commandline.genSecret.abc)
+            self.signer.install_secret(Commandline.genSecret)
             if Commandline.genSecret.abc:
                 print('Success')
             else:
