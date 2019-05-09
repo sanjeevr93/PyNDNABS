@@ -7,6 +7,7 @@ from pyndn.util.blob import Blob
 from pyndn.key_locator import KeyLocator
 # from pyndn.validity_period import ValidityPeriod
 from pyndn.encoding.tlv.tlv_encoder import TlvEncoder
+from pyndn.encoding.tlv.tlv_decoder import TlvDecoder
 from pyndn.encoding.tlv_0_2_wire_format import Tlv0_2WireFormat
 from pyndn.encoding.tlv.tlv import Tlv
 
@@ -25,6 +26,9 @@ class Sha256WithAbsSignature(GenericSignature):
             self._keyLocator = ChangeCounter(KeyLocator(value.getKeyLocator()))
             # self._validityPeriod = ChangeCounter(ValidityPeriod(value.getValidityPeriod()))
             self._signature = value._signature
+        elif isinstance(value, GenericSignature):
+            self.wireDecode(value.getSignatureInfoEncoding().toBuffer())
+            self._signature = value.getSignature()
         else:
             raise RuntimeError(
               "Unrecognized type for Sha256WithAbsSignature constructor: " +
@@ -132,6 +136,27 @@ class Sha256WithAbsSignature(GenericSignature):
         encoder.writeTypeAndLength(Tlv.SignatureInfo, len(encoder) - saveLength)
 
         self.setSignatureInfoEncoding(Blob(encoder.getOutput(), False), Tlv.SignatureType_Sha256WithAbsSignature)
+
+    def wireDecode(self, wire):
+        decoder = TlvDecoder(wire)
+
+        beginOffset = decoder.getOffset()
+        endOffset = decoder.readNestedTlvsStart(Tlv.SignatureInfo)
+
+        signatureType = decoder.readNonNegativeIntegerTlv(Tlv.SignatureType)
+        if signatureType != Tlv.SignatureType_Sha256WithAbsSignature:
+            raise RuntimeError("Invalid SignatureType code: expected %d, got %d" % (Tlv.SignatureType_Sha256WithAbsSignature, signatureType))
+
+        keyLocator = KeyLocator()
+        Tlv0_2WireFormat._decodeKeyLocator(Tlv.KeyLocator, keyLocator, decoder, True)
+
+        self._keyLocator = ChangeCounter(keyLocator)
+
+        # if decoder.peekType(Tlv.ValidityPeriod_ValidityPeriod, endOffset):
+        #     Tlv0_2WireFormat._decodeValidityPeriod(
+        #         signatureInfo.getValidityPeriod(), decoder)
+
+        decoder.finishNestedTlvs(endOffset)
 
     # Create managed properties for read/write properties of the class for more pythonic syntax.
     keyLocator = property(getKeyLocator, setKeyLocator)

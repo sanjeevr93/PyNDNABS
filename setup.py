@@ -51,6 +51,7 @@ setup(
     entry_points={
         'console_scripts': [
             'ndnabs=ndnabs.command_line:CommandLine',
+            'ndnabs-test=ndnabs.test_script:Test',
         ],
     },
 )
