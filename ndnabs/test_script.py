@@ -38,7 +38,7 @@ class Test:
 
         self.db = PickleDb(args.path)
 
-        command(args)
+        self.retval = command(args)
 
     def sign(self, args):
         data = pyndn.Data()
@@ -46,19 +46,26 @@ class Test:
         data.setContent(sys.stdin.buffer.read())
 
         signer = Signer(self.db)
-        
+
         attributes = [i.encode('utf-8') for i in args.attribute]
         signer.sign(data, attributes)
         print (str(base64.b64encode(data.wireEncode().toBytes()), 'utf-8'))
-        
+        return 0
+
     def verify(self, args):
         data = base64.b64decode(sys.stdin.buffer.read())
 
         verifier = Verifier(self.db)
         if verifier.verify(data):
             print ("Signature ACCEPTED")
+            return 1
         else:
             print ("Signature REJECTED")
+            return 0
+
+def main():
+    test = Test()
+    exit(test.retval)
 
 if __name__ == '__main__':
-    Test()
+    main()

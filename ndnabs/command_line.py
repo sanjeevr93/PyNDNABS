@@ -112,5 +112,8 @@ class CommandLine():
             print("Available attributes: %s" % ', '.join([str(i, 'utf-8') for i in signer.get_attributes()]))
         print(str(base64.b64encode(signer.get_secret()), 'utf-8'))
 
-if __name__ == '__main__':
+def main():
     CommandLine()
+
+if __name__ == '__main__':
+    main()
