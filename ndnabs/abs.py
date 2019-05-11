@@ -1,6 +1,6 @@
 # -*- Mode: python; py-indent-offset: 4; indent-tabs-mode: nil; coding: utf-8; -*-
 
-# This implementation is largely based on https://github.com/TBD/TBD
+# This implementation is largely based on https://github.com/Mamietti/ABS
 
 from charm.toolbox.pairinggroup import ZR,G1,G2,GT,pair
 from charm.toolbox.secretutil import SecretUtil

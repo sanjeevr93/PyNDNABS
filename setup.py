@@ -52,6 +52,7 @@ setup(
         'console_scripts': [
             'ndnabs=ndnabs.command_line:main',
             'ndnabs-test=ndnabs.test_script:main',
+            'ndnabs-benchmark=ndnabs.test_benchmarking:main',
         ],
     },
 )
