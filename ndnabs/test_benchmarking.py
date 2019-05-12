@@ -12,6 +12,7 @@ import pyndn
 import re
 import base64
 import time
+import csv
 
 
 class Benchmark:
@@ -47,37 +48,52 @@ class Benchmark:
 
     def setup(self, args):
         auth = AttributeAuthority(self.db)
-
-        t = time.process_time()
-        auth.setup(pyndn.Name(args.name))
-        elapsed_time = time.process_time() - t
-        print ("Setup time: %f (seconds)" % elapsed_time)
-
+        csvData = []
+        name = args.name
+        for i in range(100):
+            name = name + '%s' % i
+            t = time.process_time()
+            auth.setup(pyndn.Name(name))
+            csvData.append(str(time.process_time() - t))
+        with open('setup.csv', 'w') as csvFile:
+            writer = csv.writer(csvFile)
+            writer.writerows([csvData])
         return 0
 
     def sign(self, args):
         data = pyndn.Data()
         data.setName(pyndn.Name(args.name))
         data.setContent(sys.stdin.buffer.read())
-
+        
+        attributes = [args.attribute]
         producer = Signer(self.db)
 
-        attributes = [i.encode('utf-8') for i in args.attribute]
-        p = time.process_time()
-        producer.sign(data, attributes)
-        p_elapsed_time = time.process_time() - p
-        print ("Signing time: %f (seconds)" % p_elapsed_time)
-        print (str(base64.b64encode(data.wireEncode().toBytes()), 'utf-8'))
+        csvData = []
+
+        for i in range(100):
+            attributes.append('%s' % i)
+            attr = [i.encode('utf-8') for i in attributes]
+            p = time.process_time()
+            producer.sign(data, attr)
+            csvData.append(str(time.process_time() - p)) 
+        with open('signingtime.csv', 'w') as csvFile:
+            writer = csv.writer(csvFile)
+            writer.writerows([csvData])
         return 0
 
     def verify(self, args):
         data = base64.b64decode(sys.stdin.buffer.read())
 
-        consumer = Verifier(self.db)
-        c = time.process_time()
-        consumer.verify(data)
-        c_elapsed_time = time.process_time() - c
-        print ("Verification time: %f (seconds)" % c_elapsed_time)
+        csvData = []
+
+        for i in range(100):
+            consumer = Verifier(self.db)
+            c = time.process_time()
+            consumer.verify(data)
+            csvData.append(str(time.process_time() - c))
+        with open('verifytime.csv', 'w') as csvFile:
+            writer = csv.writer(csvFile)
+            writer.writerows([csvData])
         return 0
 
 def main():

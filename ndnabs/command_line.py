@@ -44,6 +44,9 @@ class CommandLine():
         cmd_installSecret.add_argument('-v', '--verbose', action='store_true', default=False, help='''Show extended attribute information''')
         cmd_installSecret.set_defaults(command=self.exportSecret)
 
+        cmd_getInfo = sub.add_parser('get-info', help='''Get info for the configured authority and attributes''')
+        cmd_getInfo.set_defaults(command=self.getInfo)
+
         args = parser.parse_args()
         try:
             command = args.command
@@ -109,8 +112,18 @@ class CommandLine():
         signer = Signer(self.db)
 
         if args.verbose:
-            print("Available attributes: %s" % ', '.join([str(i, 'utf-8') for i in signer.get_attributes()]))
+            print ("Available attributes: %s" % ', '.join([str(i, 'utf-8') for i in signer.get_attributes()]))
         print(str(base64.b64encode(signer.get_secret()), 'utf-8'))
+
+    def getInfo(self, args):
+        aa = AttributeAuthority(self.db)
+        signer = Signer(self.db)
+
+        print ("Installed public params for", signer.get_public_params_info().getName())
+        if aa.isSetup():
+            print ("Attribute authority (can create secret keys for attributes)")
+
+        print ("Available attributes: %s" % ', '.join([str(i, 'utf-8') for i in signer.get_attributes()]))
 
 def main():
     CommandLine()
