@@ -54,7 +54,7 @@ class Verifier():
         name = signature.getKeyLocator().getKeyName()
         attributes = name[-1].getValue().toBytes().split(b'&')
 
-        print ("Data name: %s; KeyLocator: %s" % (data.getName().toUri(), signature.getKeyLocator().getKeyName().toUri()))
-        print ("Verifying using: %s" % str(b' & '.join(attributes), 'utf-8'))
+        # print ("Data name: %s; KeyLocator: %s" % (data.getName().toUri(), signature.getKeyLocator().getKeyName().toUri()))
+        # print ("Verifying using: %s" % str(b' & '.join(attributes), 'utf-8'))
 
         return self._verify(signature.getSignature().toBytes(), data.wireEncode().toSignedBytes(), attributes)
